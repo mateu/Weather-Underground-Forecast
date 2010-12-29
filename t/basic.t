@@ -6,7 +6,7 @@ use LWP::Simple;
 use Data::Dumper::Concise;
 
 my $wunder_forecast = Weather::Underground::Forecast->new(
-    location          => 'Missoula,MT',
+    location          => '59802',
     temperature_units => 'fahrenheit',    # or 'celsius'
 );
 
@@ -18,8 +18,8 @@ SKIP:
 
     # Test internet connection
     my $source_URL = $wunder_forecast->_query_URL;
-    my $content    = get($source_URL);
-    skip( 'Skipping live test using Internet', 3 ) if !$content;
+    my $head    = head($source_URL);
+    skip( 'Skipping live test using Internet', 3 ) if !$head;
 
     my ( $highs, $lows ) = $wunder_forecast->temperatures;
     my $chance_of_precip = $wunder_forecast->precipitation;

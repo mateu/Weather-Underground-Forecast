@@ -3,10 +3,11 @@ use Moose;
 use namespace::autoclean;
 use LWP::Simple;
 use XML::Simple;
+use XML::Validate;
 
 use Data::Dumper::Concise;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 Name
 
@@ -22,9 +23,9 @@ Weather::Underground::Forecast - Simple API to Weather Underground Forecast Data
                  );
                                  
     Where the $location can be:
-    * city,state  (Bloomington,IN)
-    * zip code    (47401)
-    * latitude,longitude (46,-113)
+    * 'city,state'          Example: location => 'Bloomington,IN'
+    *  zip_code             Example: location => 47401
+    * 'latitude,longitude'  Example: location => '46,-113'
     
     my ($highs, $lows) = $forecast->temperatures;
 
@@ -49,6 +50,11 @@ has 'data' => (
     isa        => 'ArrayRef[HashRef]',
     lazy_build => 1,
 );
+has 'raw_data' => (
+    is         => 'rw',
+    isa        => 'Str',
+    lazy_build => 1,
+);
 has 'source_URL' => (
     is         => 'ro',
     isa        => 'Any',
@@ -70,7 +76,7 @@ after 'set_location' => sub {
 Get the high and low temperatures for the number of days specified.
 
     Returns: Array of two ArrayRefs being the high and low temperatures
-    Example: my ($highs, $lows) = $wunder->forecast_temperaures;
+    Example: my ($highs, $lows) = $wunder->temperaures;
 
 =cut
 
@@ -90,7 +96,7 @@ sub highs {
 
     my $key1 = 'high';
     my $key2 = $self->temperature_units;
-    return $self->get_forecast_data_by_two_keys( $key1, $key2 );
+    return $self->_get_forecast_data_by_two_keys( $key1, $key2 );
 }
 
 =head2 lows
@@ -104,22 +110,24 @@ sub lows {
 
     my $key1 = 'low';
     my $key2 = $self->temperature_units;
-    return $self->get_forecast_data_by_two_keys( $key1, $key2 );
+    return $self->_get_forecast_data_by_two_keys( $key1, $key2 );
 }
 
 =head2 precipitation
 
 Get an ArrayRef[Int] of the forecasted chance of precipitation.
 
+        Example: my $chance_of_precip = $wunder->precipitation;
+
 =cut
 
 sub precipitation {
     my $self = shift;
 
-    return $self->get_forecast_data_by_one_key('pop');
+    return $self->_get_forecast_data_by_one_key('pop');
 }
 
-=head2 get_forecast_data_by_one_key
+=head2 _get_forecast_data_by_one_key
 
 Get the values for a single forecast metric that is
 only one key deep.  An examples is: 'pop' (prob. of precip.)
@@ -129,20 +137,20 @@ the exact data structure and keys available.
 
 =cut
 
-sub get_forecast_data_by_one_key {
+sub _get_forecast_data_by_one_key {
     my ( $self, $key ) = @_;
 
     return [ map { $_->{$key} } @{ $self->data } ];
 }
 
-=head2 get_forecast_data_by_two_keys
+=head2 _get_forecast_data_by_two_keys
 
 Like the one_key method above but for values that are 
 two keys deep in the data structure.
 
 =cut
 
-sub get_forecast_data_by_two_keys {
+sub _get_forecast_data_by_two_keys {
     my ( $self, $key1, $key2 ) = @_;
 
     return [ map { $_->{$key1}->{$key2} } @{ $self->data } ];
@@ -158,14 +166,30 @@ sub _query_URL {
 sub _build_data {
     my $self = shift;
 
-    my $content = get( $self->_query_URL );
-    die "Couldn't get URL: ", $self->_query_URL unless defined $content;
-
     my $xml       = XML::Simple->new;
-    my $data_ref  = $xml->XMLin($content);
+    my $data_ref  = $xml->XMLin( $self->raw_data );
     my $forecasts = $data_ref->{simpleforecast}->{forecastday};
 
     return $forecasts;
+}
+
+sub _build_raw_data {
+    my $self = shift;
+
+    my $content = get( $self->_query_URL );
+    die "Couldn't get URL: ", $self->_query_URL unless defined $content;
+
+    my $xml_validator = new XML::Validate( Type => 'LibXML' );
+    if ( !$xml_validator->validate($content) ) {
+        my $intro   = "Document is invalid\n";
+        my $message = $xml_validator->last_error()->{message};
+        my $line    = $xml_validator->last_error()->{line};
+        my $column  = $xml_validator->last_error()->{column};
+        die "Error: $intro $message at line $line, column $column";
+    }
+
+    # return and set attribute to raw xml when we make it this far.
+    return $content;
 }
 
 sub _build_source_URL {
