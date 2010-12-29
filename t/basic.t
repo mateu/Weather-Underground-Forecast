@@ -6,7 +6,7 @@ use LWP::Simple;
 use Data::Dumper::Concise;
 
 my $wunder_forecast = Weather::Underground::Forecast->new(
-    location          => '59802',
+    location          => 'Bloomington,IN',
     temperature_units => 'fahrenheit',    # or 'celsius'
 );
 
