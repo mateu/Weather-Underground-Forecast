@@ -5,27 +5,42 @@ use Weather::Underground::Forecast;
 use LWP::Simple;
 use Data::Dumper::Concise;
 
-my $wunder_forecast = Weather::Underground::Forecast->new(
-    location          => 'Bloomington,IN',
-    temperature_units => 'fahrenheit',    # or 'celsius'
-);
+my @locations = ( 'Bloomington,IN', 11030, '21.3069444,-157.8583333' );
 
-isa_ok( $wunder_forecast, 'Weather::Underground::Forecast' );
-can_ok( 'Weather::Underground::Forecast', ( 'temperatures', 'precipitation' ) );
+my $did_isa_check = 0;
+foreach my $location (@locations) {
+    my $wunder_forecast = Weather::Underground::Forecast->new(
+        location          => $location,
+        temperature_units => 'fahrenheit',    # or 'celsius'
+    );
+    if ( !$did_isa_check ) {
+        isa_ok( $wunder_forecast, 'Weather::Underground::Forecast' );
+        can_ok(
+            'Weather::Underground::Forecast',
+            ( 'temperatures', 'precipitation' )
+        );
+        $did_isa_check = 1;
+    }
+    live_test($wunder_forecast);
+}
 
-SKIP:
-{
+sub live_test {
+    my $wunder_forecast = shift;
 
-    # Test internet connection
-    my $source_URL = $wunder_forecast->_query_URL;
-    my $head    = head($source_URL);
-    skip( 'Skipping live test using Internet', 3 ) if !$head;
+  SKIP:
+    {
 
-    my ( $highs, $lows ) = $wunder_forecast->temperatures;
-    my $chance_of_precip = $wunder_forecast->precipitation;
-    is( ref($highs),            'ARRAY', 'highs data structure' );
-    is( ref($lows),             'ARRAY', 'lows data structure' );
-    is( ref($chance_of_precip), 'ARRAY', 'precips data structure' );
+        # Test internet connection
+        my $source_URL = $wunder_forecast->_query_URL;
+        my $head       = head($source_URL);
+        skip( 'Skipping live test using Internet', 3 ) if !$head;
+
+        my ( $highs, $lows ) = $wunder_forecast->temperatures;
+        my $chance_of_precip = $wunder_forecast->precipitation;
+        is( ref($highs),            'ARRAY', 'highs data structure for location: '   . $wunder_forecast->location );
+        is( ref($lows),             'ARRAY', 'lows data structure for location: '    . $wunder_forecast->location );
+        is( ref($chance_of_precip), 'ARRAY', 'precips data structure for location: ' . $wunder_forecast->location );
+    }
 }
 
 done_testing();

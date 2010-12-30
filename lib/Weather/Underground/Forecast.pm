@@ -7,7 +7,7 @@ use XML::Validate;
 
 use Data::Dumper::Concise;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 =head1 Name
 
@@ -24,8 +24,8 @@ Weather::Underground::Forecast - Simple API to Weather Underground Forecast Data
                                  
     Where the $location can be:
     * 'city,state'          Example: location => 'Bloomington,IN'
-    *  zip_code             Example: location => 47401
-    * 'latitude,longitude'  Example: location => '46,-113'
+    *  zip_code             Example: location => 11030
+    * 'latitude,longitude'  Example: location => '21.3069444,-157.8583333'
     
     my ($highs, $lows) = $forecast->temperatures;
 
@@ -127,15 +127,15 @@ sub precipitation {
     return $self->_get_forecast_data_by_one_key('pop');
 }
 
-=head2 _get_forecast_data_by_one_key
+# =head2 _get_forecast_data_by_one_key
 
-Get the values for a single forecast metric that is
-only one key deep.  An examples is: 'pop' (prob. of precip.)
+# Get the values for a single forecast metric that is
+# only one key deep.  An examples is: 'pop' (prob. of precip.)
 
-NOTE: One can dump the data attribute to see 
-the exact data structure and keys available.
+# NOTE: One can dump the data attribute to see 
+# the exact data structure and keys available.
 
-=cut
+# =cut
 
 sub _get_forecast_data_by_one_key {
     my ( $self, $key ) = @_;
@@ -143,12 +143,12 @@ sub _get_forecast_data_by_one_key {
     return [ map { $_->{$key} } @{ $self->data } ];
 }
 
-=head2 _get_forecast_data_by_two_keys
+# =head2 _get_forecast_data_by_two_keys
 
-Like the one_key method above but for values that are 
-two keys deep in the data structure.
+# Like the one_key method above but for values that are 
+# two keys deep in the data structure.
 
-=cut
+# =cut
 
 sub _get_forecast_data_by_two_keys {
     my ( $self, $key1, $key2 ) = @_;
