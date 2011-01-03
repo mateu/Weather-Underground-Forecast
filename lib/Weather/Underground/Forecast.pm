@@ -76,7 +76,7 @@ after 'set_location' => sub {
 Get the high and low temperatures for the number of days specified.
 
     Returns: Array of two ArrayRefs being the high and low temperatures
-    Example: my ($highs, $lows) = $wunder->temperaures;
+    Example: my ($highs, $lows) = $wunder->temperatures;
 
 =cut
 
@@ -205,7 +205,7 @@ __END__
 
 =head1 Limitations
 
-It is possible that location could have more than one forecast.
+It is possible that a location could have more than one forecast.
 The behavior of that possibility has not been tested.
 
 =head1 Authors
