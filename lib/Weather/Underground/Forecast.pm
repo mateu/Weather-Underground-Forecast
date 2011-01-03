@@ -1,3 +1,4 @@
+use strictures 1;
 package Weather::Underground::Forecast;
 use Moose;
 use namespace::autoclean;
@@ -6,8 +7,6 @@ use XML::Simple;
 use XML::Validate::LibXML;
 
 use Data::Dumper::Concise;
-
-our $VERSION = '0.03';
 
 =head1 Name
 

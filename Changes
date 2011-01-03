@@ -1,5 +1,8 @@
 {{$NEXT}}
 
+          Fixes:
+          - XML::LibXML dependency (caused test to fail)
+          
 0.03      2010-12-29 20:35:22 America/Denver
           Improvements:
           - enlargen private parts (the dilemma of POD for _subs)
