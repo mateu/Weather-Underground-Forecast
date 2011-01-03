@@ -3,7 +3,7 @@ use Moose;
 use namespace::autoclean;
 use LWP::Simple;
 use XML::Simple;
-use XML::Validate;
+use XML::Validate::LibXML;
 
 use Data::Dumper::Concise;
 
@@ -179,7 +179,7 @@ sub _build_raw_data {
     my $content = get( $self->_query_URL );
     die "Couldn't get URL: ", $self->_query_URL unless defined $content;
 
-    my $xml_validator = new XML::Validate( Type => 'LibXML' );
+    my $xml_validator = new XML::Validate::LibXML;
     if ( !$xml_validator->validate($content) ) {
         my $intro   = "Document is invalid\n";
         my $message = $xml_validator->last_error()->{message};
