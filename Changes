@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.04      2011-01-03 11:29:31 America/Denver
+
           Fixes:
           - XML::LibXML dependency (caused test to fail)
           
