@@ -1,4 +1,6 @@
 {{$NEXT}}
+
+0.05      2011-01-06 07:47:46 America/Denver
           Fixes:
           - Adding XML::Validate::LibXML as a dep. was not enough.
             Need to add XML::LibXML directly.
