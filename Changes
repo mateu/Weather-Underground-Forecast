@@ -1,7 +1,9 @@
 {{$NEXT}}
+          Fixes:
+          - Adding XML::Validate::LibXML as a dep. was not enough.
+            Need to add XML::LibXML directly.
 
 0.04      2011-01-03 11:29:31 America/Denver
-
           Fixes:
           - XML::LibXML dependency (caused test to fail)
           
