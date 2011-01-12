@@ -32,9 +32,13 @@ sub live_test {
 
         # Test internet connection
         my $source_URL = $wunder_forecast->_query_URL;
-        my $head       = head($source_URL);
-        skip( 'Skipping live test using Internet', 3 ) if !$head;
+        my $content       = get($source_URL);
+        skip( 'Skipping live test using Internet', 3 ) if !$content;
 
+        # If we're not skipping the test then let's use the $content to set the raw_data
+        # and thereby avoiding another request (which has been known to fail).  
+        # Thus, we are guaranteed to have data if we get this far.
+        $wunder_forecast->raw_data($content);
         my ( $highs, $lows ) = $wunder_forecast->temperatures;
         my $chance_of_precip = $wunder_forecast->precipitation;
         is( ref($highs),            'ARRAY', 'highs data structure for location: '   . $wunder_forecast->location );
